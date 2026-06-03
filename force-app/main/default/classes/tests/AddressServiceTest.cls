@@ -14,7 +14,12 @@ private class AddressServiceTest {
             (fflib_ISObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
 
         mocks.startStubbing();
-        mocks.when(hubServiceMock.getCep('01001-000')).thenReturn(cep);
+        mocks.when(
+            hubServiceMock.getCep(
+                (String) fflib_Match.eq('01001-000'),
+                (IntegrationLogContext) fflib_Match.anyObject()
+            )
+        ).thenReturn(cep);
         mocks.stopStubbing();
 
         Application.Service.setMock(IHubSalesforceService.class, hubServiceMock);
@@ -24,7 +29,11 @@ private class AddressServiceTest {
             (IAddressService) Application.Service.newInstance(IAddressService.class);
         service.enrichAddress('01001-000', accountId);
 
-        ((IHubSalesforceService) mocks.verify(hubServiceMock)).getCep('01001-000');
+        ((IHubSalesforceService) mocks.verify(hubServiceMock))
+            .getCep(
+                (String) fflib_Match.eq('01001-000'),
+                (IntegrationLogContext) fflib_Match.anyObject()
+            );
         ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock))
             .registerDirty(
                 fflib_Match.sObjectWith(
@@ -54,7 +63,12 @@ private class AddressServiceTest {
             (fflib_ISObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
 
         mocks.startStubbing();
-        mocks.when(hubServiceMock.getCep('01001000')).thenReturn(cep);
+        mocks.when(
+            hubServiceMock.getCep(
+                (String) fflib_Match.eq('01001000'),
+                (IntegrationLogContext) fflib_Match.anyObject()
+            )
+        ).thenReturn(cep);
         mocks.stopStubbing();
 
         Application.Service.setMock(IHubSalesforceService.class, hubServiceMock);
@@ -64,7 +78,11 @@ private class AddressServiceTest {
             (IAddressService) Application.Service.newInstance(IAddressService.class);
         service.enrichAddress('01001000', contactId);
 
-        ((IHubSalesforceService) mocks.verify(hubServiceMock)).getCep('01001000');
+        ((IHubSalesforceService) mocks.verify(hubServiceMock))
+            .getCep(
+                (String) fflib_Match.eq('01001000'),
+                (IntegrationLogContext) fflib_Match.anyObject()
+            );
         ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock))
             .registerDirty(
                 fflib_Match.sObjectWith(
@@ -104,7 +122,10 @@ private class AddressServiceTest {
         }
 
         ((IHubSalesforceService) mocks.verify(hubServiceMock, fflib_ApexMocks.NEVER))
-            .getCep((String) fflib_Match.anyObject());
+            .getCep(
+                (String) fflib_Match.anyObject(),
+                (IntegrationLogContext) fflib_Match.anyObject()
+            );
         ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock, fflib_ApexMocks.NEVER))
             .commitWork();
     }

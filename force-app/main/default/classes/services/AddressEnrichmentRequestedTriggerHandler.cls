@@ -12,7 +12,9 @@ public with sharing class AddressEnrichmentRequestedTriggerHandler {
                 requests.add(
                     new AddressEnrichmentRequest(
                         eventRecord.Cep__c,
-                        (Id) eventRecord.RecordId__c
+                        (Id) eventRecord.RecordId__c,
+                        eventRecord.Source__c,
+                        eventRecord.CorrelationId__c
                     )
                 );
             } catch (StringException ex) {

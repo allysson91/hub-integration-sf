@@ -12,7 +12,11 @@ public with sharing class HubSalesforceService implements IHubSalesforceService 
     }
 
     public HubSalesforceCepDTO getCep(String cep) {
-        String body = gateway.get(HubSalesforceRoutes.cep(cep));
+        return getCep(cep, null);
+    }
+
+    public HubSalesforceCepDTO getCep(String cep, IntegrationLogContext logContext) {
+        String body = gateway.get(HubSalesforceRoutes.cep(cep), logContext);
         HubSalesforceCepResponseDTO hubResponse =
             (HubSalesforceCepResponseDTO) JSON.deserialize(body, HubSalesforceCepResponseDTO.class);
 

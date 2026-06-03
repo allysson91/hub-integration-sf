@@ -3,6 +3,7 @@ private class HubSalesforceGatewayTest {
 
     @IsTest
     static void send_deveMontarEndpointSemBarraInicial() {
+        IntegrationLogService.registeredLogs.clear();
         Test.setMock(HttpCalloutMock.class, new SuccessMock('GET', null, false));
 
         Test.startTest();
@@ -14,6 +15,7 @@ private class HubSalesforceGatewayTest {
 
     @IsTest
     static void post_deveEnviarBodyJson() {
+        IntegrationLogService.registeredLogs.clear();
         Test.setMock(HttpCalloutMock.class, new SuccessMock('POST', '{"name":"Teste"}', true));
 
         Test.startTest();
@@ -25,6 +27,7 @@ private class HubSalesforceGatewayTest {
 
     @IsTest
     static void put_deveEnviarMetodoPut() {
+        IntegrationLogService.registeredLogs.clear();
         Test.setMock(HttpCalloutMock.class, new SuccessMock('PUT', '{"name":"Teste"}', true));
 
         Test.startTest();
@@ -36,6 +39,7 @@ private class HubSalesforceGatewayTest {
 
     @IsTest
     static void patch_deveEnviarMetodoPatch() {
+        IntegrationLogService.registeredLogs.clear();
         Test.setMock(HttpCalloutMock.class, new SuccessMock('PATCH', '{"rating":"Hot"}', true));
 
         Test.startTest();
@@ -47,6 +51,7 @@ private class HubSalesforceGatewayTest {
 
     @IsTest
     static void deleteRequest_deveEnviarMetodoDelete() {
+        IntegrationLogService.registeredLogs.clear();
         Test.setMock(HttpCalloutMock.class, new SuccessMock('DELETE', null, false));
 
         Test.startTest();
@@ -64,6 +69,30 @@ private class HubSalesforceGatewayTest {
         } catch (HubSalesforceException e) {
             System.assert(e.getMessage().contains('Rota'));
         }
+    }
+
+    @IsTest
+    static void send_deveRegistrarContextoFuncionalNoLog() {
+        IntegrationLogService.registeredLogs.clear();
+        Id accountId = TestDataFactory.account().build().Id;
+        Test.setMock(HttpCalloutMock.class, new SuccessMock('GET', null, false));
+
+        IntegrationLogContext context = IntegrationLogContext.create()
+            .forRecord(accountId)
+            .fromSource('AccountTriggerUpdate')
+            .withCorrelationId('corr-123');
+
+        Test.startTest();
+        new HubSalesforceGateway().get('/cep/81925570', context);
+        Test.stopTest();
+
+        System.assertEquals(1, IntegrationLogService.registeredLogs.size());
+        IntegrationLogDTO log = IntegrationLogService.registeredLogs[0];
+        System.assertEquals(accountId, log.recordId);
+        System.assertEquals('AccountTriggerUpdate', log.source);
+        System.assertEquals('corr-123', log.correlationId);
+        System.assertEquals('GET /cep/81925570', log.operation);
+        System.assertEquals(200, log.statusCode);
     }
 
     private class SuccessMock implements HttpCalloutMock {

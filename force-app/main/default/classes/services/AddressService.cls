@@ -36,7 +36,10 @@ public with sharing class AddressService implements IAddressService {
 
         for (AddressEnrichmentRequest request : requests) {
             IAddressRecordUpdater updater = updaterFactory.getUpdater(request.recordId.getSObjectType());
-            HubSalesforceCepDTO address = hubSalesforceService.getCep(request.cep);
+            HubSalesforceCepDTO address = hubSalesforceService.getCep(
+                request.cep,
+                IntegrationLogContext.fromAddressRequest(request)
+            );
             results.add(new AddressEnrichmentResult(request, address, updater));
         }
 

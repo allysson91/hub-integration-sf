@@ -23,26 +23,50 @@ public with sharing class HubSalesforceGateway {
     }
 
     public String get(String route) {
-        return send(METHOD_GET, route, null);
+        return get(route, null);
+    }
+
+    public String get(String route, IntegrationLogContext logContext) {
+        return send(METHOD_GET, route, null, logContext);
     }
 
     public String post(String route, String body) {
-        return send(METHOD_POST, route, body);
+        return post(route, body, null);
+    }
+
+    public String post(String route, String body, IntegrationLogContext logContext) {
+        return send(METHOD_POST, route, body, logContext);
     }
 
     public String put(String route, String body) {
-        return send(METHOD_PUT, route, body);
+        return put(route, body, null);
+    }
+
+    public String put(String route, String body, IntegrationLogContext logContext) {
+        return send(METHOD_PUT, route, body, logContext);
     }
 
     public String patch(String route, String body) {
-        return send(METHOD_PATCH, route, body);
+        return patch(route, body, null);
+    }
+
+    public String patch(String route, String body, IntegrationLogContext logContext) {
+        return send(METHOD_PATCH, route, body, logContext);
     }
 
     public String deleteRequest(String route) {
-        return send(METHOD_DELETE, route, null);
+        return deleteRequest(route, null);
+    }
+
+    public String deleteRequest(String route, IntegrationLogContext logContext) {
+        return send(METHOD_DELETE, route, null, logContext);
     }
 
     public String send(String method, String route, String body) {
+        return send(method, route, body, null);
+    }
+
+    public String send(String method, String route, String body, IntegrationLogContext logContext) {
         Long startedAt = DateTime.now().getTime();
         String endpoint = buildEndpoint(route);
         Boolean logRegistered = false;
@@ -69,7 +93,8 @@ public with sharing class HubSalesforceGateway {
                         .withHttp(method, endpoint, statusCode)
                         .withPayloads(body, response.getBody())
                         .took(durationMs)
-                        .success()
+                        .success(),
+                    logContext
                 );
                 logRegistered = true;
                 return response.getBody();
@@ -84,7 +109,8 @@ public with sharing class HubSalesforceGateway {
                     .withHttp(method, endpoint, statusCode)
                     .withPayloads(body, response.getBody())
                     .took(durationMs)
-                    .error(hubException)
+                    .error(hubException),
+                logContext
             );
             logRegistered = true;
 
@@ -95,7 +121,8 @@ public with sharing class HubSalesforceGateway {
                     buildLog(method, endpoint, route, body)
                         .withPayloads(body, null)
                         .took(DateTime.now().getTime() - startedAt)
-                        .error(ex)
+                        .error(ex),
+                    logContext
                 );
             }
 
@@ -131,7 +158,15 @@ public with sharing class HubSalesforceGateway {
     }
 
     private void registerLog(IntegrationLogDTO log) {
+        registerLog(log, null);
+    }
+
+    private void registerLog(IntegrationLogDTO log, IntegrationLogContext logContext) {
         if (integrationLogService != null) {
+            if (logContext != null) {
+                logContext.applyTo(log);
+            }
+
             integrationLogService.register(log);
         }
     }
