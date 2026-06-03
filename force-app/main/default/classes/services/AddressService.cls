@@ -2,21 +2,25 @@ public with sharing class AddressService implements IAddressService {
 
     private final IHubSalesforceService hubSalesforceService;
     private final AddressRecordUpdaterFactory updaterFactory;
+    private final IIntegrationLogService integrationLogService;
 
     public AddressService() {
         this(
             (IHubSalesforceService) Application.Service.newInstance(IHubSalesforceService.class),
-            new AddressRecordUpdaterFactory()
+            new AddressRecordUpdaterFactory(),
+            (IIntegrationLogService) Application.Service.newInstance(IIntegrationLogService.class)
         );
     }
 
     @TestVisible
     private AddressService(
         IHubSalesforceService hubSalesforceService,
-        AddressRecordUpdaterFactory updaterFactory
+        AddressRecordUpdaterFactory updaterFactory,
+        IIntegrationLogService integrationLogService
     ) {
         this.hubSalesforceService = hubSalesforceService;
         this.updaterFactory = updaterFactory;
+        this.integrationLogService = integrationLogService;
     }
 
     public void enrichAddress(String cep, Id recordId) {
@@ -52,6 +56,7 @@ public with sharing class AddressService implements IAddressService {
             uow.commitWork();
         } finally {
             AddressEnrichmentTriggerControl.bypassAccountPublishing = false;
+            flushIntegrationLogs();
         }
     }
 
@@ -68,6 +73,12 @@ public with sharing class AddressService implements IAddressService {
             if (String.isBlank(request.cep)) {
                 throw new AddressException('CEP nao informado.');
             }
+        }
+    }
+
+    private void flushIntegrationLogs() {
+        if (integrationLogService != null) {
+            integrationLogService.flushRegistered();
         }
     }
 

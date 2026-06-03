@@ -4,7 +4,8 @@ public class Application {
         new fflib_Application.UnitOfWorkFactory(
             new List<SObjectType>{
                 Account.SObjectType,
-                Contact.SObjectType
+                Contact.SObjectType,
+                Integration_Log__c.SObjectType
             }
         );
 
@@ -12,7 +13,8 @@ public class Application {
         new fflib_Application.ServiceFactory(
             new Map<Type, Type>{
                 IHubSalesforceService.class => HubSalesforceService.class,
-                IAddressService.class => AddressService.class
+                IAddressService.class => AddressService.class,
+                IIntegrationLogService.class => IntegrationLogService.class
             }
         );
 
