@@ -2,24 +2,22 @@ public class AccountsService implements IAccountsService {
 
     public void updateRatingForHotAccounts(Set<Id> accountIds) {
 
-        // 1. Busca dados via Selector
+        // 1. Selector via Application (mockável)
         IAccountsSelector selector =
             (IAccountsSelector) Application.Selector.newInstance(Account.SObjectType);
 
+        // 2. UnitOfWork via Application (mockável)
+        fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+
         List<Account> accounts = selector.selectById(accountIds);
 
-        // 2. Aplica lógica
-        List<Account> toUpdate = new List<Account>();
         for (Account acc : accounts) {
             if (acc.Industry == 'Technology') {
                 acc.Rating = 'Hot';
-                toUpdate.add(acc);
+                uow.registerDirty(acc);  // registra, não executa ainda
             }
         }
 
-        // 3. DML direto por enquanto (Unit of Work vem depois)
-        if (!toUpdate.isEmpty()) {
-            update toUpdate;
-        }
+        uow.commitWork();  // único ponto de DML — mockável no teste
     }
 }
