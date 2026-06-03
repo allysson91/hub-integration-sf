@@ -10,7 +10,8 @@ public class Application {
     public static final fflib_Application.ServiceFactory Service =
         new fflib_Application.ServiceFactory(
             new Map<Type, Type>{
-                IAccountsService.class => AccountsService.class
+                IAccountsService.class => AccountsService.class,
+                IHubSalesforceService.class => HubSalesforceService.class
             }
         );
 
