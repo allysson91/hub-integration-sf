@@ -1,4 +1,4 @@
-trigger AccountAddressEnrichmentTrigger on Account (after insert, after update) {
+trigger AccountTrigger on Account (after insert, after update) {
     AccountAddressEnrichmentTriggerHandler handler =
         new AccountAddressEnrichmentTriggerHandler();
 
