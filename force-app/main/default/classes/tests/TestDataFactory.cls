@@ -21,6 +21,7 @@ public class TestDataFactory {
         private Id recordId = fflib_IDGenerator.generate(Account.SObjectType);
         private String name = 'Empresa Teste';
         private String phone = '11999990000';
+        private String billingPostalCode;
 
         public AccountBuilder withId(Id recordId) {
             this.recordId = recordId;
@@ -32,11 +33,17 @@ public class TestDataFactory {
             return this;
         }
 
+        public AccountBuilder withBillingPostalCode(String billingPostalCode) {
+            this.billingPostalCode = billingPostalCode;
+            return this;
+        }
+
         public Account build() {
             return new Account(
                 Id = recordId,
                 Name = name,
-                Phone = phone
+                Phone = phone,
+                BillingPostalCode = billingPostalCode
             );
         }
     }

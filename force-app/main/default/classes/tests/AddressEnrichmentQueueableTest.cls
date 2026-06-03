@@ -2,7 +2,7 @@
 private class AddressEnrichmentQueueableTest {
 
     @IsTest
-    static void execute_deveDelegarParaAddressService() {
+    static void execute_deveDelegarListaParaAddressService() {
         fflib_ApexMocks mocks = new fflib_ApexMocks();
 
         Id accountId = TestDataFactory.account().build().Id;
@@ -16,6 +16,6 @@ private class AddressEnrichmentQueueableTest {
         Test.stopTest();
 
         ((IAddressService) mocks.verify(addressServiceMock))
-            .enrichAddress('01001000', accountId);
+            .enrichAddresses((List<AddressEnrichmentRequest>) fflib_Match.anyObject());
     }
 }
