@@ -22,9 +22,12 @@ public with sharing class AddressService implements IAddressService {
     public void enrichAddress(String cep, Id recordId) {
         validate(recordId);
 
-        HubSalesforceCepDTO address = hubSalesforceService.getCep(cep);
         IAddressRecordUpdater updater = updaterFactory.getUpdater(recordId.getSObjectType());
-        updater.updateAddress(recordId, address);
+        HubSalesforceCepDTO address = hubSalesforceService.getCep(cep);
+
+        fflib_ISObjectUnitOfWork uow = Application.UnitOfWork.newInstance();
+        updater.registerAddressUpdate(recordId, address, uow);
+        uow.commitWork();
     }
 
     private static void validate(Id recordId) {

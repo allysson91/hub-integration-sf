@@ -1,3 +1,7 @@
 public interface IAddressRecordUpdater {
-    void updateAddress(Id recordId, HubSalesforceCepDTO address);
+    void registerAddressUpdate(
+        Id recordId,
+        HubSalesforceCepDTO address,
+        fflib_ISObjectUnitOfWork uow
+    );
 }

@@ -1,6 +1,10 @@
 public with sharing class AccountAddressUpdater implements IAddressRecordUpdater {
 
-    public void updateAddress(Id recordId, HubSalesforceCepDTO address) {
+    public void registerAddressUpdate(
+        Id recordId,
+        HubSalesforceCepDTO address,
+        fflib_ISObjectUnitOfWork uow
+    ) {
         Account accountToUpdate = new Account(
             Id = recordId,
             BillingStreet = buildStreet(address),
@@ -10,7 +14,7 @@ public with sharing class AccountAddressUpdater implements IAddressRecordUpdater
             BillingPostalCode = address.cep
         );
 
-        update accountToUpdate;
+        uow.registerDirty(accountToUpdate);
     }
 
     private static String buildStreet(HubSalesforceCepDTO address) {

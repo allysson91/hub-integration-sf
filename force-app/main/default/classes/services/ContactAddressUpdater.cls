@@ -1,6 +1,10 @@
 public with sharing class ContactAddressUpdater implements IAddressRecordUpdater {
 
-    public void updateAddress(Id recordId, HubSalesforceCepDTO address) {
+    public void registerAddressUpdate(
+        Id recordId,
+        HubSalesforceCepDTO address,
+        fflib_ISObjectUnitOfWork uow
+    ) {
         Contact contactToUpdate = new Contact(
             Id = recordId,
             MailingStreet = buildStreet(address),
@@ -10,7 +14,7 @@ public with sharing class ContactAddressUpdater implements IAddressRecordUpdater
             MailingPostalCode = address.cep
         );
 
-        update contactToUpdate;
+        uow.registerDirty(contactToUpdate);
     }
 
     private static String buildStreet(HubSalesforceCepDTO address) {

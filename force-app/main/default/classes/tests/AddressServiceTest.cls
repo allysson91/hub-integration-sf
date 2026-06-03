@@ -2,97 +2,110 @@
 private class AddressServiceTest {
 
     @IsTest
-    static void enrichAddress_deveAtualizarBillingAddress_quandoRecordIdForAccount() {
-        Account account = new Account(Name = 'Empresa CEP', Phone = '11999990000');
-        insert account;
+    static void enrichAddress_deveRegistrarBillingAddress_quandoRecordIdForAccount() {
+        fflib_ApexMocks mocks = new fflib_ApexMocks();
 
-        mockHubSalesforceService();
+        Id accountId = TestDataFactory.account().build().Id;
+        HubSalesforceCepDTO cep = TestDataFactory.cep().build();
 
-        Test.startTest();
+        IHubSalesforceService hubServiceMock =
+            (IHubSalesforceService) mocks.mock(IHubSalesforceService.class);
+        fflib_ISObjectUnitOfWork uowMock =
+            (fflib_ISObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
+
+        mocks.startStubbing();
+        mocks.when(hubServiceMock.getCep('01001-000')).thenReturn(cep);
+        mocks.stopStubbing();
+
+        Application.Service.setMock(IHubSalesforceService.class, hubServiceMock);
+        Application.UnitOfWork.setMock(uowMock);
+
         IAddressService service =
             (IAddressService) Application.Service.newInstance(IAddressService.class);
-        service.enrichAddress('01001-000', account.Id);
-        Test.stopTest();
+        service.enrichAddress('01001-000', accountId);
 
-        Account updatedAccount = [
-            SELECT BillingStreet, BillingCity, BillingStateCode, BillingCountryCode, BillingPostalCode
-            FROM Account
-            WHERE Id = :account.Id
-        ];
-
-        System.assertEquals('Praca da Se\nlado impar', updatedAccount.BillingStreet);
-        System.assertEquals('Sao Paulo', updatedAccount.BillingCity);
-        System.assertEquals('SP', updatedAccount.BillingStateCode);
-        System.assertEquals('BR', updatedAccount.BillingCountryCode);
-        System.assertEquals('01001000', updatedAccount.BillingPostalCode);
+        ((IHubSalesforceService) mocks.verify(hubServiceMock)).getCep('01001-000');
+        ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock))
+            .registerDirty(
+                fflib_Match.sObjectWith(
+                    new Map<SObjectField, Object>{
+                        Account.Id => accountId,
+                        Account.BillingStreet => 'Praca da Se\nlado impar',
+                        Account.BillingCity => 'Sao Paulo',
+                        Account.BillingStateCode => 'SP',
+                        Account.BillingCountryCode => 'BR',
+                        Account.BillingPostalCode => '01001000'
+                    }
+                )
+            );
+        ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock)).commitWork();
     }
 
     @IsTest
-    static void enrichAddress_deveAtualizarMailingAddress_quandoRecordIdForContact() {
-        Contact contact = new Contact(LastName = 'Contato CEP');
-        insert contact;
+    static void enrichAddress_deveRegistrarMailingAddress_quandoRecordIdForContact() {
+        fflib_ApexMocks mocks = new fflib_ApexMocks();
 
-        mockHubSalesforceService();
+        Id contactId = TestDataFactory.contact().build().Id;
+        HubSalesforceCepDTO cep = TestDataFactory.cep().build();
 
-        Test.startTest();
+        IHubSalesforceService hubServiceMock =
+            (IHubSalesforceService) mocks.mock(IHubSalesforceService.class);
+        fflib_ISObjectUnitOfWork uowMock =
+            (fflib_ISObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
+
+        mocks.startStubbing();
+        mocks.when(hubServiceMock.getCep('01001000')).thenReturn(cep);
+        mocks.stopStubbing();
+
+        Application.Service.setMock(IHubSalesforceService.class, hubServiceMock);
+        Application.UnitOfWork.setMock(uowMock);
+
         IAddressService service =
             (IAddressService) Application.Service.newInstance(IAddressService.class);
-        service.enrichAddress('01001000', contact.Id);
-        Test.stopTest();
+        service.enrichAddress('01001000', contactId);
 
-        Contact updatedContact = [
-            SELECT MailingStreet, MailingCity, MailingStateCode, MailingCountryCode, MailingPostalCode
-            FROM Contact
-            WHERE Id = :contact.Id
-        ];
-
-        System.assertEquals('Praca da Se\nlado impar', updatedContact.MailingStreet);
-        System.assertEquals('Sao Paulo', updatedContact.MailingCity);
-        System.assertEquals('SP', updatedContact.MailingStateCode);
-        System.assertEquals('BR', updatedContact.MailingCountryCode);
-        System.assertEquals('01001000', updatedContact.MailingPostalCode);
+        ((IHubSalesforceService) mocks.verify(hubServiceMock)).getCep('01001000');
+        ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock))
+            .registerDirty(
+                fflib_Match.sObjectWith(
+                    new Map<SObjectField, Object>{
+                        Contact.Id => contactId,
+                        Contact.MailingStreet => 'Praca da Se\nlado impar',
+                        Contact.MailingCity => 'Sao Paulo',
+                        Contact.MailingStateCode => 'SP',
+                        Contact.MailingCountryCode => 'BR',
+                        Contact.MailingPostalCode => '01001000'
+                    }
+                )
+            );
+        ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock)).commitWork();
     }
 
     @IsTest
     static void enrichAddress_deveFalhar_quandoObjetoNaoForSuportado() {
-        Opportunity opportunity = new Opportunity(
-            Name = 'Opp CEP',
-            StageName = 'Prospecting',
-            CloseDate = Date.today().addDays(10)
-        );
-        insert opportunity;
+        fflib_ApexMocks mocks = new fflib_ApexMocks();
 
-        mockHubSalesforceService();
+        Id opportunityId = TestDataFactory.opportunity().build().Id;
+        IHubSalesforceService hubServiceMock =
+            (IHubSalesforceService) mocks.mock(IHubSalesforceService.class);
+        fflib_ISObjectUnitOfWork uowMock =
+            (fflib_ISObjectUnitOfWork) mocks.mock(fflib_SObjectUnitOfWork.class);
+
+        Application.Service.setMock(IHubSalesforceService.class, hubServiceMock);
+        Application.UnitOfWork.setMock(uowMock);
 
         try {
             IAddressService service =
                 (IAddressService) Application.Service.newInstance(IAddressService.class);
-            service.enrichAddress('01001000', opportunity.Id);
+            service.enrichAddress('01001000', opportunityId);
             System.assert(false, 'Era esperado erro para objeto nao suportado.');
         } catch (AddressException e) {
             System.assert(e.getMessage().contains('Objeto nao suportado'));
         }
-    }
 
-    private static void mockHubSalesforceService() {
-        Application.Service.setMock(IHubSalesforceService.class, new HubSalesforceServiceMock());
-    }
-
-    private class HubSalesforceServiceMock implements IHubSalesforceService {
-        public HubSalesforceCepDTO getCep(String cep) {
-            HubSalesforceCepDTO response = new HubSalesforceCepDTO();
-            response.cep = '01001000';
-            response.logradouro = 'Praca da Se';
-            response.complemento = 'lado impar';
-            response.bairro = 'Se';
-            response.localidade = 'Sao Paulo';
-            response.uf = 'SP';
-            response.ibge = '3550308';
-            response.gia = '1004';
-            response.ddd = '11';
-            response.siafi = '7107';
-            response.erro = false;
-            return response;
-        }
+        ((IHubSalesforceService) mocks.verify(hubServiceMock, fflib_ApexMocks.NEVER))
+            .getCep((String) fflib_Match.anyObject());
+        ((fflib_ISObjectUnitOfWork) mocks.verify(uowMock, fflib_ApexMocks.NEVER))
+            .commitWork();
     }
 }
