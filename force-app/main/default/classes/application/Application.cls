@@ -11,7 +11,8 @@ public class Application {
         new fflib_Application.ServiceFactory(
             new Map<Type, Type>{
                 IAccountsService.class => AccountsService.class,
-                IHubSalesforceService.class => HubSalesforceService.class
+                IHubSalesforceService.class => HubSalesforceService.class,
+                IAddressService.class => AddressService.class
             }
         );
 
